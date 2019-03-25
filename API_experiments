@@ -1,0 +1,89 @@
+##########################################
+###     WIKIPEDIA API CONSTRUCTION     ###
+##########################################
+
+# This file is to experiment with the mediaWiki API, to establish how to pull data.
+
+
+# Helpful webpages --------------------------------------------------------
+
+# how to use mediawiki's querying in the API
+# https://www.mediawiki.org/wiki/API:Query
+
+
+
+
+library(tidyverse)
+library(jsonlite)
+library(httr)
+
+
+# Establishing a basic connection -----------------------------------------
+
+# FromJSON does not work
+fromJSON("http://example.org/w/api.php") 
+# Nor does a simple read_lines
+read_lines("http://example.org/w/api.php")
+# GET from httr works!
+GET("http://example.org/w/api.php")
+
+
+# Basic Query -------------------------------------------------------------
+
+#code provided by the site
+GET("http://example.org/w/api.php?action=query&list=search&srsearch=Craig%20Noone&format=jsonfm") %>%
+  str()
+# generates a 404
+
+GET("https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=Craig%20Noone&format=jsonfm") %>%
+  str()
+
+# check out someone else, John Locke.
+fromJSON("https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=John%20Locke&format=json")
+
+# try to refine the search to get teh text of john locke's page, not just metadata 
+# should be something like the results of # GET("https://en.wikipedia.org/wiki/John_Locke")
+# use 'titles' parameter
+GET("https://en.wikipedia.org/w/api.php?action=query&titles=John%20Locke&format=json")
+#didnt return what I wanted, next try looking up bu pageID, (16143, given in the above conde's return)
+GET("https://en.wikipedia.org/w/api.php?action=query&pageids=16143&format=json")
+# also didn't work, likewise peovides pretty sparse info
+
+# add the "rvprop=content" command to specify we want the page content
+GET("https://en.wikipedia.org/w/api.php?action=query&&prop=revisions&titles=John%20Locke&rvprop=content&format=json")
+
+# use alt. configuration usign /index.php instead
+GET("https://en.wikipedia.org/w/index.php?title=John%20Locke&action=raw")
+#this works, but i need to figure out best way to grab it, with read_lines, fromJSON, GET (httr), etc.
+# NOTE the end of this file has mane '[[Categoy:______]]' which liekly can be used to look up other philosophers/ or other scientistsi in certain fields later 
+#     see https://en.wikipedia.org/wiki/Help:Category
+#appears to be in some difined format, if not a standard one, which could be used to parst out the info I want
+
+#first, il try to add '' to the end of the query to get JSON data
+GET("https://en.wikipedia.org/w/index.php?title=John%20Locke&action=raw&format=json")
+#didn't work, no change to the output
+
+
+# Test mine index.php data for analysis -----------------------------------
+
+# 1. get names of'influencedby' people
+# 2. une one of those names to construct a query (manually) for one of those peopoe
+jLocke_data <- GET("https://en.wikipedia.org/w/index.php?title=John%20Locke&action=raw")
+str(jLocke_data)
+#GETreturns daa in a nonobvious way, printing it gives human readabl eout put but i cant find the actual text in the structure command
+jLocke_data <- read_lines("https://en.wikipedia.org/w/index.php?title=John%20Locke&action=raw")
+head(jLocke_data)
+#this is better for a quick + dirty test, its a vector w/ one line in each element. Lets use stringr to pick out the one with "| influences" in it
+str_subset(jLocke_data, "\\| influences")
+#lets extract what's in teh [[___]] and renegotiate into a vecto
+jLocke_data %>%
+  str_subset("\\| influences") %>%
+  str_split(", ") %>%
+  map(str_extract, "\\[.*\\|")
+#still needs the '[[' and ' | characers removed. [6] shows an obviosu issue with <ref>, or referneces embedded in the text.
+# good enough for the test, its evident its feasable to pull these names
+
+# Part 2, lets ocnstruct queries for these new guys.
+GET("https://en.wikipedia.org/w/index.php?title=Hugo%20Grotius&action=raw")
+# Rene Descartses presentens a problem with the tilde on the 'e'
+GET("https://en.wikipedia.org/w/index.php?title=Robert%20Filmer&action=raw")
