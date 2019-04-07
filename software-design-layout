@@ -1,0 +1,37 @@
+# DESIGN OF WEB OF SCIENCE 
+# A project to gather, parse, and analyse scientists and their network connection to other scientists
+# Using data obtained from Wikipedia's API
+
+1. Get a person's data
+	a. construct API calls
+	b. execute those calls to retireve text data
+	c. pull infobox data
+	d. basic parsing to split infobox into a list
+	e. save the data in a list of people-lists
+	should give you a finction, GET_wiki_data(name), that calls the api and saves data to the raw_person_data list
+
+2. Parse the person's data
+	for a given person,
+	a. pull the couple of list elements that we care about (influenced, influences, era, etc.)
+	b. parse those elements into something sensible
+	c. save as a parsed list
+	nto quite fully developed in my mind. on one hand, it needs to have mudular functions for each property (like 'parse_influencers()', parse_notable_students()', etc
+	but also i want to be able to take a whole person object from raw_person_data and parsing all properties at once, and save into person_data list
+	
+3. crawl through to find other people
+   starting from a seed scientist,
+	a. select the next person to look for
+	b. identify if they are a scientist. if not, stop and skip to next person
+	c. execute "1. Get a person's data"
+		- which adds their data to the raw_person_db list
+	d. Parse some data (usign step 2) to prepare influences/influencer names for next step
+	e. pull a person's influenced/influences and add to a db
+	f. check off that person as having their data retrieved
+
+4. Analyse
+	TBD
+	This part is more open-ended, adn is pretty much a completely different project than the data collection,
+	and doesn't nececarily need to be spelled out, as long as the desired data is successfully gathered and saved.
+	There is a nececary connection to step 2, to make sure we clean the needed data
+	Presumably there is a conversion of the collected data to a more suitable format for network analysis.
+	And used for a visualization.
