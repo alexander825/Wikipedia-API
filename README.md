@@ -10,3 +10,6 @@ Continued digging into the MediaWiki webpages to understand the api.
 Found the package WikipediaR, which needs to be returned to bur unfortunately I couldnt get anything of value out of it.
 Knowing how to pull the page data from day 1, I've edecided to move forward by parsing that semi-formatted text data. Begun writing a function to take a webpage and output the summary data that appears in a box on teh right side of wikipedia pages. 
 This week I started writitng the code to parse th esemi-structured text data into an R object about the given person.
+
+Update 3 - 4/7/2019
+Uploading the plan of attack for the program, in software-design-plan, to guide the coding of the program. Wrote part 1, to grab an individual person's data from the web and save it to a db.
